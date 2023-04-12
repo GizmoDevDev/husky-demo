@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+chatgpt_token=$(grep $CHATGPT_TOKEN= .env | cut -d '=' -f 2)
+
+send_message() {
+  message=$1
+  json=$(echo "$message" | jq -R '.')
+  response=$(curl --insecure https://api.openai.com/v1/chat/completions \
+               -H 'Content-Type: application/json' \
+               -H "Authorization: Bearer $chatgpt_token" \
+               -d "{
+                  \"model\": \"gpt-3.5-turbo\",
+                  \"messages\": [{\"role\": \"user\", \"content\": $json}]
+                }" | jq '.choices[].message.content')
+  echo "$response"
+}
+
+last_commit=$(git diff HEAD^ HEAD)
+commit_without_newline=$(echo "$last_commit" | tr -d '\n')
+commit_without_newline+=' its a git changes. Get recommendation for improving code'
+
+send_message "$commit_without_newline"
