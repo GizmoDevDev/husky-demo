@@ -1,3 +1,5 @@
+// Требуемый формат коммита:
+// feat(scope): description
 module.exports = {
   rules: {
     'body-leading-blank': [2, 'always'],
